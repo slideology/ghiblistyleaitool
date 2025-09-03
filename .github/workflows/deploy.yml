@@ -1,0 +1,70 @@
+name: Deploy to Cloudflare Workers
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 8
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build project
+        run: pnpm run build
+
+      - name: Configure wrangler with secrets
+        run: |
+          # Update wrangler.jsonc with actual values from secrets
+          sed -i 's/YOUR_DOMAIN_HERE/${{ secrets.DOMAIN }}/g' wrangler.jsonc
+          sed -i 's/YOUR_D1_DATABASE_ID/${{ secrets.D1_DATABASE_ID }}/g' wrangler.jsonc
+          sed -i 's/YOUR_KV_NAMESPACE_ID/${{ secrets.KV_NAMESPACE_ID }}/g' wrangler.jsonc
+          sed -i 's/YOUR_R2_BUCKET_NAME/${{ secrets.R2_BUCKET_NAME }}/g' wrangler.jsonc
+
+      - name: Deploy to Cloudflare Workers
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+          workingDirectory: '.'
+          secrets: |
+            SESSION_SECRET
+            CDN_URL
+            GOOGLE_CLIENT_ID
+            GOOGLE_CLIENT_SECRET
+            KIEAI_APIKEY
+            CREEM_KEY
+            CREEM_TEST_KEY
+            CREEM_WEBHOOK_SECRET
+            GOOGLE_ANALYTICS_ID
+            GOOGLE_ADS_ID
+        env:
+          SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
+          CDN_URL: ${{ secrets.CDN_URL }}
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          KIEAI_APIKEY: ${{ secrets.KIEAI_APIKEY }}
+          CREEM_KEY: ${{ secrets.CREEM_KEY }}
+          CREEM_TEST_KEY: ${{ secrets.CREEM_TEST_KEY }}
+          CREEM_WEBHOOK_SECRET: ${{ secrets.CREEM_WEBHOOK_SECRET }}
+          GOOGLE_ANALYTICS_ID: ${{ secrets.GOOGLE_ANALYTICS_ID }}
+          GOOGLE_ADS_ID: ${{ secrets.GOOGLE_ADS_ID }}

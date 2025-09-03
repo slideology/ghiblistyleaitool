@@ -1,0 +1,59 @@
+/**
+ * For more details on how to configure Wrangler, refer to:
+ * https://developers.cloudflare.com/workers/wrangler/configuration/
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ai-hairstyle",
+  "main": "./workers/app.ts",
+  "compatibility_date": "2025-04-04",
+  "compatibility_flags": ["nodejs_compat"],
+  "upload_source_maps": true,
+  // "routes": [
+  //   {
+  //     "pattern": "example.com",
+  //     "custom_domain": true
+  //   },
+  //   {
+  //     "pattern": "www.example.com",
+  //     "custom_domain": true
+  //   }
+  // ],
+  "vars": {
+    // Note: Sensitive values are set via GitHub Secrets in production
+    // For local development, copy .env.example to .env and fill in your values
+    "DOMAIN": "YOUR_DOMAIN_HERE", // Deploy Domain
+    "GOOGLE_ANALYTICS_ID": "G-XXXXXXX", // GA
+    "GOOGLE_ADS_ID": "pub-xxxxxxxxxxxxxxxx", // Google AdSense
+    "INITLIZE_CREDITS": 3 // Basic Credits (Gift for new user)
+  },
+  "observability": {
+    "enabled": true
+  },
+  /**
+   * Bindings
+   * Bindings allow your Worker to interact with resources on the Cloudflare Developer Platform, including
+   * databases, object storage, AI inference, real-time communication and more.
+   * https://developers.cloudflare.com/workers/runtime-apis/bindings/
+   */
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "ai-hairstyle",
+      "database_id": "YOUR_D1_DATABASE_ID",
+      "migrations_dir": "./app/.server/drizzle/migrations"
+    }
+  ],
+  "kv_namespaces": [
+    {
+      "binding": "KV",
+      "id": "YOUR_KV_NAMESPACE_ID"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "R2",
+      "bucket_name": "YOUR_R2_BUCKET_NAME"
+    }
+  ]
+}
